@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#	command to execute test:
+i=$1
+./hw1 < hw1-tests/t$i.in > hw1-tests/t$i.res
+diff hw1-tests/t$i.res hw1-tests/t$i.out
+if [[ $? != 0 ]] 
+	then
+		echo "Failed test #"$i"!"
+	else
+		echo "Test #"$i" Successfully Passed!"
+fi
