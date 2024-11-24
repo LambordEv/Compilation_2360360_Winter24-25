@@ -7,7 +7,7 @@
 
 int checkGivenStringLexema(const char* givenStr)
 {
-    int givenStrLen = yyleng;
+    const int givenStrLen = yyleng;
     char resultString[1025] = {0};
     int resultLen = 0;
     
@@ -24,6 +24,10 @@ int checkGivenStringLexema(const char* givenStr)
                 resultString[resultLen] = '\\';
                 break;
             case '"':
+                if((givenStrLen - 1) == i)
+                {
+                    output::errorUnclosedString();
+                }
                 resultString[resultLen] = '"';
                 break;
             case 'n':
@@ -68,7 +72,11 @@ int checkGivenStringLexema(const char* givenStr)
                 else // The first charecter is not a hex value.
                 {
                     char hexEscapeErr[4] = {'x', givenStr[i+1], givenStr[i+2], '\0'};
-                    if(((i + 2) == (givenStrLen - 1)))
+                    if(((i + 1) == (givenStrLen - 1)))
+                    {
+                        hexEscapeErr[1] = '\0';
+                    }
+                    else if (((i + 2) == (givenStrLen - 1)))
                     {
                         hexEscapeErr[2] = '\0';
                     }
@@ -85,7 +93,6 @@ int checkGivenStringLexema(const char* givenStr)
             if('"' == givenStr[i])
             {
                 //The String has a '"' charecter in the middle of it without an escape charecter
-                printf("Here!\n");
                 output::errorUnclosedString();
             }
 
@@ -97,7 +104,6 @@ int checkGivenStringLexema(const char* givenStr)
     // The String is not closed with '"' as supposed to
     if('"' != givenStr[givenStrLen - 1])
     {
-        printf("There!\n");
         output::errorUnclosedString();
     }
     else
