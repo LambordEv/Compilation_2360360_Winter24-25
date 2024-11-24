@@ -44,16 +44,16 @@ commentLexema                           (\/\/.*)
 
 idLexema                                ({letter}+{decimalDigit}*{letter}*)
 
-numLexema                               ([1-9]+{decimalDigit}*)
+numLexema                               ((0)|([1-9]+{decimalDigit}*))
 
 byteNumLexema                           ({numLexema}b)
 
-%x STRING
-stringLexemaEnter                       (\".*\")
-stringUnclosed                          (\".*\\n)
+%x STRING_LEXEMA
+stringLexemaEnter                       (\")
+stringLexema                            (.*\")
+
 
 %%
-
 {voidToken}                             { return VOID; }
 {intToken}                              { return INT; }
 {byteToken}                             { return BYTE; }
@@ -84,10 +84,12 @@ stringUnclosed                          (\".*\\n)
 {numLexema}                             { return NUM; }
 {byteNumLexema}                         { return NUM_B; }
 
-{stringLexemaEnter}                     { return STRING; }
-{stringUnclosed}                        { output::errorUnclosedString(); return 0; }
+
+{stringLexemaEnter}                     { BEGIN(STRING_LEXEMA); }
+<STRING_LEXEMA>{stringLexema}           { BEGIN(INITIAL); return STRING; }
+<STRING_LEXEMA>.                        { output::errorUnclosedString(); }
 
 {whitespace}                            ;
-.                                       { output::errorUnknownChar(*yytext); return 0; }
+.                                       { output::errorUnknownChar(*yytext); }
 
 %%

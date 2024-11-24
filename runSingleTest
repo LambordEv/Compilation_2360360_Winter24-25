@@ -3,10 +3,19 @@
 #	command to execute test:
 i=$1
 ./hw1 < hw1-tests/t$i.in > hw1-tests/t$i.res
-diff hw1-tests/t$i.res hw1-tests/t$i.out
+diff hw1-tests/t$i.res hw1-tests/t$i.out > /dev/null
 if [[ $? != 0 ]] 
 	then
 		echo "Failed test #"$i"!"
+		echo "Given Input:"
+		cat hw1-tests/t$i.in
+		echo ""
+		echo "----------------------------------------"
+		echo "My Output:"
+		cat hw1-tests/t$i.res
+		echo "----------------------------------------"
+		echo "Expected Output:"
+		cat hw1-tests/t$i.out
 	else
 		echo "Test #"$i" Successfully Passed!"
 fi

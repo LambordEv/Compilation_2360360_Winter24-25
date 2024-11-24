@@ -12,7 +12,7 @@ int checkGivenStringLexema(const char* givenStr)
     int resultLen = 0;
     
     // printf("Given String is %s\n", givenStr);
-    for(int i = 1; i < givenStrLen - 1; ++i)
+    for(int i = 0; i < givenStrLen - 1; ++i)
     {
         // printf("Current Charecter is - %c\n", givenStr[i]);
         if('\\' == givenStr[i])
@@ -39,7 +39,7 @@ int checkGivenStringLexema(const char* givenStr)
                 resultString[resultLen] = '\0';
                 break;
             case 'x': //hex form of a valid char of format xDD
-                if(IS_HEX_VALUE(givenStr[i+1]))
+                if(((i + 1) < (givenStrLen - 1)) && IS_HEX_VALUE(givenStr[i+1]))
                 {
                     if(IS_HEX_VALUE(givenStr[i+2]))
                     {
@@ -58,12 +58,20 @@ int checkGivenStringLexema(const char* givenStr)
                     else // The second charecter is not a hex value.
                     {
                         char hexEscapeErr[4] = {'x', givenStr[i+1], givenStr[i+2], '\0'};
+                        if(((i + 2) == (givenStrLen - 1)))
+                        {
+                            hexEscapeErr[2] = '\0';
+                        }
                         output::errorUndefinedEscape(hexEscapeErr);
                     }
                 }
                 else // The first charecter is not a hex value.
                 {
-                    char hexEscapeErr[3] = {'x', givenStr[i+1], '\0'};
+                    char hexEscapeErr[4] = {'x', givenStr[i+1], givenStr[i+2], '\0'};
+                    if(((i + 2) == (givenStrLen - 1)))
+                    {
+                        hexEscapeErr[2] = '\0';
+                    }
                     output::errorUndefinedEscape(hexEscapeErr);
                 }
                 break;
@@ -77,6 +85,7 @@ int checkGivenStringLexema(const char* givenStr)
             if('"' == givenStr[i])
             {
                 //The String has a '"' charecter in the middle of it without an escape charecter
+                printf("Here!\n");
                 output::errorUnclosedString();
             }
 
@@ -88,6 +97,7 @@ int checkGivenStringLexema(const char* givenStr)
     // The String is not closed with '"' as supposed to
     if('"' != givenStr[givenStrLen - 1])
     {
+        printf("There!\n");
         output::errorUnclosedString();
     }
     else
