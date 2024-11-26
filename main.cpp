@@ -5,6 +5,17 @@
 
 #define IS_HEX_VALUE(val)       ((('0' <= val && '9' >= val) || ('a' <= val && 'f' >= val) || ('A' <= val && 'F' >= val)) ? true : false)
 
+bool isAPrintableChar(char givenHexValue)
+{  
+    bool result = false;
+    result = ((0x20 <= givenHexValue) && (givenHexValue <= 0x7E));
+    result = result || (0x09 == givenHexValue); //tab charecter
+    result = result || (0x0A == givenHexValue); //new line charecter
+    result = result || (0x0D == givenHexValue); //carriage return charecter (another way of new line charecter)
+    return result;
+    
+}
+
 int checkGivenStringLexema(const char* givenStr)
 {
     const int givenStrLen = yyleng;
@@ -48,7 +59,7 @@ int checkGivenStringLexema(const char* givenStr)
                     if(IS_HEX_VALUE(givenStr[i+2]))
                     {
                         int receivedHexValue = strtol(&givenStr[i+1], NULL, 16);
-                        if(0x20 <= receivedHexValue && receivedHexValue <= 0x7E) //The given value is printable?
+                        if(isAPrintableChar(receivedHexValue)) //The given value is printable?
                         {
                             resultString[resultLen] = receivedHexValue;
                         }
