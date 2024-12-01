@@ -39,4 +39,7 @@ extern int yyleng;
 
 extern int yylex();
 
+extern int accumalatedStrLen;
+extern char accumalatedString[2096];
+
 #endif //TOKENS_HPP

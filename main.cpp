@@ -5,25 +5,29 @@
 
 #define IS_HEX_VALUE(val)       ((('0' <= val && '9' >= val) || ('a' <= val && 'f' >= val) || ('A' <= val && 'F' >= val)) ? true : false)
 
+int accumalatedStrLen;
+char accumalatedString[2096];
+
 bool isAPrintableChar(char givenHexValue)
-{  
+{
     bool result = false;
     result = ((0x20 <= givenHexValue) && (givenHexValue <= 0x7E));
     result = result || (0x09 == givenHexValue); //tab charecter
     result = result || (0x0A == givenHexValue); //new line charecter
     result = result || (0x0D == givenHexValue); //carriage return charecter (another way of new line charecter)
-    return result;
     
+    return result;
 }
 
 int checkGivenStringLexema(const char* givenStr)
 {
-    const int givenStrLen = yyleng;
+    const int givenStrLen = accumalatedStrLen;
     char resultString[1025] = {0};
     int resultLen = 0;
     
-    // printf("Given String is %s\n", givenStr);
-    for(int i = 0; i < givenStrLen - 1; ++i)
+    // printf("Given String is - %s\n", givenStr);
+    int i = 0;
+    for(; i < givenStrLen - 1; i++)
     {
         // printf("Current Charecter is - %c\n", givenStr[i]);
         if('\\' == givenStr[i])
@@ -35,10 +39,6 @@ int checkGivenStringLexema(const char* givenStr)
                 resultString[resultLen] = '\\';
                 break;
             case '"':
-                if((givenStrLen - 1) == i)
-                {
-                    output::errorUnclosedString();
-                }
                 resultString[resultLen] = '"';
                 break;
             case 'n':
@@ -113,13 +113,15 @@ int checkGivenStringLexema(const char* givenStr)
     }
 
     // The String is not closed with '"' as supposed to
-    if('"' != givenStr[givenStrLen - 1])
+    if((i == 0) || ('"' != givenStr[i]))
     {
+        // printf("%d\n", i);
         output::errorUnclosedString();
     }
     else
     {
         output::printToken(yylineno, STRING, resultString);
+        accumalatedStrLen = 0;
     }
 
     return 0;
@@ -164,7 +166,8 @@ int main() {
             break;
 
         case STRING:
-            checkGivenStringLexema(yytext);
+            // printf("Given String in case - %s\n", accumalatedString);
+            checkGivenStringLexema(accumalatedString);
             break;
 
         default:

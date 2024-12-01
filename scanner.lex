@@ -4,6 +4,9 @@
 #include <stdio.h>
 #include "tokens.hpp"
 #include "output.hpp"
+
+/*------- Function Declarion Section -------*/
+void accumalateStringLexema(void);
 %}
 
 %option yylineno
@@ -49,8 +52,8 @@ numLexema                               ((0)|([1-9]+{decimalDigit}*))
 byteNumLexema                           ({numLexema}b)
 
 %x STRING_LEXEMA
-stringLexemaEnter                       (\")
-stringLexema                            (.*\")
+%x STRING_ESCAPE
+stringLexemaEnterExit                   (\")
 
 
 %%
@@ -85,11 +88,33 @@ stringLexema                            (.*\")
 {byteNumLexema}                         { return NUM_B; }
 
 
-{stringLexemaEnter}                     { BEGIN(STRING_LEXEMA); }
-<STRING_LEXEMA>{stringLexema}           { BEGIN(INITIAL); return STRING; }
-<STRING_LEXEMA>.                        { output::errorUnclosedString(); }
+{stringLexemaEnterExit}                 { BEGIN(STRING_LEXEMA); }
+<STRING_LEXEMA>[\\]                     { BEGIN(STRING_ESCAPE); accumalateStringLexema(); }
+<STRING_LEXEMA>{stringLexemaEnterExit}  { BEGIN(INITIAL); accumalateStringLexema(); return STRING; }
+<STRING_LEXEMA><<EOF>>                  { BEGIN(INITIAL); return STRING; }
+<STRING_LEXEMA>[\n]                     { BEGIN(INITIAL); return STRING; }
+<STRING_LEXEMA>[\r]                     { BEGIN(INITIAL); return STRING; }
+<STRING_LEXEMA>(.)                      { accumalateStringLexema(); }
+
+
+<STRING_ESCAPE><<EOF>>                  { BEGIN(INITIAL); return STRING; }
+<STRING_ESCAPE>.                        { BEGIN(STRING_LEXEMA); accumalateStringLexema(); }
+
+
 
 {whitespace}                            ;
 .                                       { output::errorUnknownChar(*yytext); }
 
 %%
+
+void accumalateStringLexema(void)
+{
+    for(int j = 0; j < yyleng; ++j)
+    {
+        //printf("%c", yytext[j]);
+        accumalatedString[accumalatedStrLen + j] = yytext[j];
+    }
+    //printf("\n");
+
+    accumalatedStrLen += yyleng;
+}
